@@ -1,42 +1,43 @@
-# Statistical Method Selector
+# Quantitative Method Recommender
 
-An interactive tool to help users select the appropriate quantitative analysis method based on their research needs.
+An interactive tool that helps users select the appropriate statistical method for their research data and questions.
 
-## Purpose
+## Overview
 
-This tool guides users through a series of simple questions about their data and research objectives, leading them to the most appropriate statistical method for their analysis.
+This simple web application guides you through a decision tree to recommend the most suitable statistical analysis method based on your data type and research objectives.
+
+## Key Features
+
+- **Interactive Decision Tree**: Answer simple questions about your data to find the right method
+- **Dynamic Filtering**: See relevant methods as you make selections
+- **Clear Categorization**: Methods organized by data type (continuous, categorical, or mixed)
+- **Visual Highlights**: Final recommendation clearly highlighted
+- **Simple Reset**: Start over with a single click
+
+## Supported Methods
+
+- **Continuous Data**: Correlation, Factor Analysis, Simple/Multiple Linear Regression
+- **Categorical Data**: Chi-square tests (goodness-of-fit, independence)
+- **Mixed Data**: t-tests, ANOVA variants, MANOVA, ANCOVA, Logistic Regression
 
 ## How to Use
 
 1. Open `index.html` in any modern web browser
-2. Start by answering the first question: "What do you want to analyze?"
-3. Follow the decision tree by selecting the option that best matches your data and research question
-4. Continue until you reach a recommended statistical method
-5. Use the "Start Over" button to begin a new search
+2. Answer the first question about your data type
+3. Follow the decision path based on your research goals
+4. Receive a highlighted recommendation
+5. Click "Start Over" to begin a new search
 
-## Features
+## Technical Details
 
-- Simple, intuitive interface
-- Step-by-step decision process
-- Displays your selection path
-- Covers major statistical methods including:
-  - Correlation analysis
-  - Linear regression (simple and multiple)
-  - Logistic regression
-  - t-tests (one-sample, independent samples, paired)
-  - ANOVA (one-way, factorial, repeated measures)
-  - ANCOVA
-  - MANOVA
-  - Chi-square tests
+- Client-side only (no server required)
+- Built with HTML5, CSS3, and JavaScript
+- No external dependencies
+- Works in all modern browsers
 
-## Technical Information
+## Customization
 
-This is a client-side only application built with:
-- HTML5
-- CSS3 
-- JavaScript (ES6+)
-
-No server or build process required.
+The application is built around a flexible decision tree structure, making it easy to extend with additional statistical methods or decision paths as needed.
 
 ## Credits
 
