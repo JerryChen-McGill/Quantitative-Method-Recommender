@@ -1,18 +1,18 @@
 const decisionTree = {
     // 第一级选择
     "root": {
-        question: "I deal with",
+        question: "I Deal With",
         options: [
             {
-                text: "Only Continuous variables",
+                text: "Only Continuous Variables",
                 next: "continuous-variables"
             },
             {
-                text: "Only Categorical data",
+                text: "Only Categorical Data",
                 next: "Chi-square"
             },
             {
-                text: "Categorical and Continuous variables",
+                text: "Categorical And Continuous Variables",
                 next: "mixed-variables"
             }
         ]
@@ -20,7 +20,7 @@ const decisionTree = {
 
     // 连续变量分支
     "continuous-variables": {
-        question: "I want to",
+        question: "I Want To",
         options: [
             {
                 text: "Decide Variable Number",
@@ -31,20 +31,20 @@ const decisionTree = {
                 result: "Correlation"
             },
             {
-                text: "Predict a variable",
+                text: "Predict A Variable",
                 next: "Linear Regression"
             }
         ]
     },
     "Linear Regression": {
-        question: "by",
+        question: "By",
         options: [
             {
-                text: "Another variable",
+                text: "Another Variable",
                 result: "Simple Linear Regression"
             },
             {
-                text: "Multiple predictors",
+                text: "Multiple Predictors",
                 result: "Multiple Linear Regression"
             }
         ]
@@ -52,25 +52,25 @@ const decisionTree = {
 
     // 纯分类变量分支
     "Chi-square": {
-        question: "I want to",
+        question: "I Want To",
         options: [
             {
-                text: "Compare distribution to the expected",
-                result: "Chi-square goodness-of-fit test"
+                text: "Compare Distribution To The Expected",
+                result: "Chi-square Goodness-of-fit Test"
             },
             {
-                text: "Test independence between variables",
-                result: "Chi-square test of independence"
+                text: "Test Independence Between Variables",
+                result: "Chi-square Test Of Independence"
             }
         ]
     },
 
     // 混合变量分支
     "mixed-variables": {
-        question: "I want to",
+        question: "I Want To",
         options: [
             {
-                text: "Find differences",
+                text: "Find Differences",
                 next: "find-differences"
             },
             {
@@ -89,11 +89,11 @@ const decisionTree = {
                 next: "T-test"
             },
             {
-                text: "More than two groups",
+                text: "More Than Two Groups",
                 next: "ANOVA"
             },
             {
-                text: "Related/repeated measures",
+                text: "Related/Repeated Measures",
                 result: "Repeated-measures ANOVA"
             }
         ]
@@ -102,16 +102,16 @@ const decisionTree = {
         question: "Specifically:",
         options: [
             {
-                text: "Sample vs Population",
-                result: "One-sample t-test"
+                text: "Sample Vs Population",
+                result: "One-sample T-test"
             },
             {
-                text: "Two independent groups",
-                result: "Independent-sample t-test"
+                text: "Two Independent Groups",
+                result: "Independent-sample T-test"
             },
             {
-                text: "Two related (paired) groups",
-                result: "Related-sample t-test (Paired t-test)"
+                text: "Two Related (Paired) Groups",
+                result: "Related-sample T-test (Paired T-test)"
             }
         ]
     },
@@ -119,19 +119,19 @@ const decisionTree = {
         question: "Specifically:",
         options: [
             {
-                text: "Independent groups",
+                text: "Independent Groups",
                 result: "One-way ANOVA"
             },
             {
-                text: "Independent groups with multiple factors",
+                text: "Independent Groups With Multiple Factors",
                 result: "Factorial ANOVA"
             },
             {
-                text: "Independent groups adjusting for covariates",
+                text: "Independent Groups Adjusting For Covariates",
                 result: "ANCOVA"
             },
             {
-                text: "for multiple dependent variables",
+                text: "For Multiple Dependent Variables",
                 result: "MANOVA"
             }
         ]

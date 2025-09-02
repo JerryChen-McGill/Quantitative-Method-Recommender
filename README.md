@@ -18,7 +18,7 @@ This simple web application guides you through a decision tree to recommend the 
 
 - **Continuous Data**: Correlation, Factor Analysis, Simple/Multiple Linear Regression
 - **Categorical Data**: Chi-square tests (goodness-of-fit, independence)
-- **Mixed Data**: t-tests, ANOVA variants, MANOVA, ANCOVA, Logistic Regression
+- **Mixed Data**: T-tests, ANOVA variants, MANOVA, ANCOVA, Logistic Regression
 
 ## How to Use
 
