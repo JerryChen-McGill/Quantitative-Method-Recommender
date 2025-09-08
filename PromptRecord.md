@@ -12,7 +12,6 @@ Recommended method可以一开始就显示在下方，并且一开始的时候�
 
 无法访问此网站
 localhost 拒绝了我们的连接请求。
-
 检查问题
 
 @index.html @style.css 
@@ -117,3 +116,7 @@ More than two groups时，下面会显示Repeated-measures ANOVA，但实际上�
 将Start Over按钮移动到Quantitative Method Recommender标题的右边，下拉框面板的上边。且按钮右边和这个下拉框面板右边平齐，保持按钮原本的样式设计。但改文字为：Reset
 
 悬停效果修改一下，仅仅有轻微颜色变化即可，不要让它移动位置。
+
+2025.9.7
+在屏幕底下写两个链接进去，做得风格统一，并且简约极简，不要做得很明显，就灰色小字的链接即可。一个是More 一个是Contact
+More 的网址：@https://jerrychen-mcgill.github.io/ ，Contact点击后冒出一个邮箱1694377957@qq.com，后面跟一个复制图标按钮，点击按钮就复制成功且消息提示复制成功。点击任何其他处，邮箱隐藏。

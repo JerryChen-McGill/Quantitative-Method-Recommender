@@ -585,4 +585,90 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 初始化决策树
     initDecisionTree();
+
+    // 初始化底部链接功能
+    initFooterLinks();
 });
+
+// 底部链接功能
+function initFooterLinks() {
+    const contactLink = document.getElementById('contact-link');
+    const contactModal = document.getElementById('contact-modal');
+    const copyBtn = document.getElementById('copy-btn');
+    const email = '1694377957@qq.com';
+
+    // Contact链接点击事件
+    contactLink.addEventListener('click', (e) => {
+        e.preventDefault();
+        contactModal.classList.add('show');
+    });
+
+    // 复制按钮点击事件
+    copyBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        try {
+            await navigator.clipboard.writeText(email);
+            showCopySuccess();
+        } catch (err) {
+            // 如果clipboard API不可用，使用fallback方法
+            fallbackCopyTextToClipboard(email);
+        }
+    });
+
+    // 点击其他地方隐藏邮箱弹窗
+    document.addEventListener('click', (e) => {
+        if (!contactModal.contains(e.target) && !contactLink.contains(e.target)) {
+            contactModal.classList.remove('show');
+        }
+    });
+
+    // 防止弹窗内部点击事件冒泡
+    contactModal.addEventListener('click', (e) => {
+        e.stopPropagation();
+    });
+}
+
+// 显示复制成功提示
+function showCopySuccess() {
+    // 创建提示元素
+    const successMsg = document.createElement('div');
+    successMsg.className = 'copy-success';
+    successMsg.textContent = '复制成功';
+    document.body.appendChild(successMsg);
+
+    // 显示提示
+    setTimeout(() => {
+        successMsg.classList.add('show');
+    }, 10);
+
+    // 2秒后隐藏并移除
+    setTimeout(() => {
+        successMsg.classList.remove('show');
+        setTimeout(() => {
+            document.body.removeChild(successMsg);
+        }, 300);
+    }, 2000);
+}
+
+// Fallback复制方法（兼容旧浏览器）
+function fallbackCopyTextToClipboard(text) {
+    const textArea = document.createElement('textarea');
+    textArea.value = text;
+    textArea.style.position = 'fixed';
+    textArea.style.left = '-999999px';
+    textArea.style.top = '-999999px';
+    document.body.appendChild(textArea);
+    textArea.focus();
+    textArea.select();
+    
+    try {
+        const successful = document.execCommand('copy');
+        if (successful) {
+            showCopySuccess();
+        }
+    } catch (err) {
+        console.error('Fallback: 无法复制文本', err);
+    }
+    
+    document.body.removeChild(textArea);
+}

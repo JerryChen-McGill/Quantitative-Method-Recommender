@@ -276,4 +276,114 @@ select option:hover {
     .method-item {
         width: 100%;
     }
+}
+
+/* 底部链接样式 */
+.footer-links {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    gap: 15px;
+    z-index: 1000;
+}
+
+.footer-link {
+    color: #999;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 300;
+    transition: color 0.3s ease;
+    cursor: pointer;
+}
+
+.footer-link:hover {
+    color: #666;
+}
+
+/* Contact邮箱弹窗样式 */
+.contact-modal {
+    position: fixed;
+    bottom: 60px;
+    right: 20px;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    border-radius: 8px;
+    padding: 12px 16px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: all 0.3s ease;
+    z-index: 1001;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.contact-modal.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.contact-content {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.email-text {
+    font-size: 14px;
+    color: #333;
+    font-family: 'Courier New', monospace;
+}
+
+.copy-btn {
+    background: none;
+    border: none;
+    font-size: 14px;
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+}
+
+.copy-btn:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+}
+
+/* 复制成功提示 */
+.copy-success {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    padding: 12px 24px;
+    border-radius: 6px;
+    font-size: 14px;
+    z-index: 1002;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.copy-success.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+/* 响应式设计 - 底部链接 */
+@media (max-width: 768px) {
+    .footer-links {
+        bottom: 15px;
+        right: 15px;
+        gap: 12px;
+    }
+    
+    .contact-modal {
+        bottom: 50px;
+        right: 15px;
+        padding: 10px 14px;
+    }
 } 
