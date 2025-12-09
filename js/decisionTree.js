@@ -23,8 +23,12 @@ const decisionTree = {
         question: "I Want To",
         options: [
             {
-                text: "Decide Variable Number",
-                result: "Factor Analyses"
+                text: "Decide Variable Number / Reduce Dimensions",
+                result: "Factor Analysis"
+            },
+            {
+                text: "Classify Individuals (Latent Classes)",
+                result: "Mixture Modeling (LPA)"
             },
             {
                 text: "Measure Correlation",
@@ -33,6 +37,14 @@ const decisionTree = {
             {
                 text: "Predict A Variable",
                 next: "Linear Regression"
+            },
+            {
+                text: "Test Complex/Causal Models",
+                next: "Complex-Models"
+            },
+            {
+                text: "Explain Mechanism (How/When)",
+                next: "Mechanisms"
             }
         ]
     },
@@ -46,6 +58,32 @@ const decisionTree = {
             {
                 text: "Multiple Predictors",
                 result: "Multiple Linear Regression"
+            }
+        ]
+    },
+    "Complex-Models": {
+        question: "Using",
+        options: [
+            {
+                text: "Only Observed Variables",
+                result: "Path Analysis"
+            },
+            {
+                text: "Latent Variables (Factors)",
+                result: "Structural Equation Modeling(SEM)"
+            }
+        ]
+    },
+    "Mechanisms": {
+        question: "Specifically",
+        options: [
+            {
+                text: "Explain HOW X affects Y (Process)",
+                result: "Mediation"
+            },
+            {
+                text: "Explain WHEN X affects Y (Condition)",
+                result: "Moderation"
             }
         ]
     },
@@ -69,6 +107,10 @@ const decisionTree = {
     "mixed-variables": {
         question: "I Want To",
         options: [
+            {
+                text: "Analyze Nested/Hierarchical Data",
+                result: "Multilevel Modeling (MLM)"
+            },
             {
                 text: "Find Differences",
                 next: "find-differences"

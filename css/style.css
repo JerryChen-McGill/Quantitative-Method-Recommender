@@ -58,49 +58,68 @@ h1 span {
     min-width: 220px;
     max-width: 320px;
     flex: 1;
+    position: relative;
 }
 
 .select-label {
-    font-size: 14px;
-    color: #6c757d;
-    margin-bottom: 8px;
-    font-weight: 500;
+    font-size: 15px;
+    color: #6e6e73;
+    margin-bottom: 10px;
+    font-weight: 600;
+    letter-spacing: 0;
+    margin-left: 4px;
     text-transform: none;
-    letter-spacing: 0.3px;
 }
 
 select {
-    padding: 12px 16px;
-    border: 2px solid #e9ecef;
-    border-radius: 12px;
-    background: linear-gradient(145deg, #ffffff, #f8f9fa);
-    font-size: 14px;
-    color: #495057;
-    cursor: pointer;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    
     width: 100%;
+    padding: 14px 40px 14px 16px;
+    font-size: 16px;
+    line-height: 1.4;
+    
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.12);
+    border-radius: 14px;
+    color: #1d1d1f;
+    
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+    
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    
+    /* 修复箭头显示问题 */
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 16px;
+    
     font-weight: 400;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
     text-overflow: ellipsis;
     white-space: nowrap;
     overflow: hidden;
 }
 
 select:hover {
-    border-color: #667eea;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.15);
+    background-color: #ffffff;
+    border-color: rgba(0, 0, 0, 0.2);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    transform: translateY(-1px);
 }
 
 select:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #0071e3;
+    box-shadow: 0 0 0 4px rgba(0, 113, 227, 0.15);
 }
 
 select option {
     padding: 12px;
     background-color: #ffffff;
-    color: #495057;
+    color: #1d1d1f;
     font-size: 14px;
     white-space: normal;
     word-wrap: break-word;

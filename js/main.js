@@ -273,7 +273,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // 根据当前路径获取应该显示的方法列表
     function getMethodsForCurrentPath(pathSelections, currentValue) {
         // 如果当前选择有直接结果，返回该结果
-        if (currentValue && !currentValue.includes('-') && !currentValue.includes(' ')) {
+        if (currentValue && !currentValue.includes('-') && !currentValue.includes(' ') && !currentValue.startsWith('Complex') && !currentValue.startsWith('Mechanism')) {
             // 检查是否是最终节点
             const currentNode = decisionTree[currentValue];
             if (currentNode && currentNode.options) {
@@ -295,18 +295,29 @@ document.addEventListener('DOMContentLoaded', () => {
         if (currentValue === "ANOVA") {
             return ['One-way ANOVA', 'Factorial ANOVA', 'ANCOVA', 'MANOVA'];
         }
+
+        // 特殊处理：如果当前值是 "Complex-Models"，返回相关方法
+        if (currentValue === "Complex-Models") {
+            return ['Path Analysis', 'Structural Equation Modeling(SEM)'];
+        }
+
+        // 特殊处理：如果当前值是 "Mechanisms"，返回相关方法
+        if (currentValue === "Mechanisms") {
+            return ['Mediation', 'Moderation'];
+        }
         
         // 根据路径长度和选择内容进行精确匹配
         if (pathSelections.length === 1) {
             // 第一层选择
             const firstChoice = pathSelections[0];
             if (firstChoice === "Only Continuous Variables") {
-                return ['Correlation', 'Factor Analyses', 'Simple Linear Regression', 'Multiple Linear Regression'];
+                return ['Correlation', 'Factor Analysis', 'Mixture Modeling (LPA)', 'Simple Linear Regression', 'Multiple Linear Regression', 
+                       'Path Analysis', 'Structural Equation Modeling(SEM)', 'Mediation', 'Moderation'];
             } else if (firstChoice === "Only Categorical Data") {
                 return ['Chi-square Goodness-of-fit Test', 'Chi-square Test Of Independence'];
             } else if (firstChoice === "Categorical And Continuous Variables") {
                 return ['Logistic Regression', 'One-sample T-test', 'Independent-sample T-test', 'Related-sample T-test (Paired T-test)', 
-                       'One-way ANOVA', 'Factorial ANOVA', 'ANCOVA', 'MANOVA', 'Repeated-measures ANOVA'];
+                       'One-way ANOVA', 'Factorial ANOVA', 'ANCOVA', 'MANOVA', 'Repeated-measures ANOVA', 'Multilevel Modeling (MLM)'];
             }
         } else if (pathSelections.length === 2) {
             // 第二层选择
@@ -314,12 +325,18 @@ document.addEventListener('DOMContentLoaded', () => {
             const secondChoice = pathSelections[1];
             
             if (firstChoice === "Only Continuous Variables") {
-                if (secondChoice === "Decide Variable Number") {
-                    return ['Factor Analyses'];
+                if (secondChoice === "Decide Variable Number / Reduce Dimensions") {
+                    return ['Factor Analysis'];
+                } else if (secondChoice === "Classify Individuals (Latent Classes)") {
+                    return ['Mixture Modeling (LPA)'];
                 } else if (secondChoice === "Measure Correlation") {
                     return ['Correlation'];
                 } else if (secondChoice === "Predict A Variable") {
                     return ['Simple Linear Regression', 'Multiple Linear Regression'];
+                } else if (secondChoice === "Test Complex/Causal Models") {
+                    return ['Path Analysis', 'Structural Equation Modeling(SEM)'];
+                } else if (secondChoice === "Explain Mechanism (How/When)") {
+                    return ['Mediation', 'Moderation'];
                 }
             } else if (firstChoice === "Only Categorical Data") {
                 if (secondChoice === "Compare Distribution To The Expected") {
@@ -328,7 +345,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return ['Chi-square Test Of Independence'];
                 }
             } else if (firstChoice === "Categorical And Continuous Variables") {
-                if (secondChoice === "Find Differences") {
+                if (secondChoice === "Analyze Nested/Hierarchical Data") {
+                    return ['Multilevel Modeling (MLM)'];
+                } else if (secondChoice === "Find Differences") {
                     return ['One-sample T-test', 'Independent-sample T-test', 'Related-sample T-test (Paired T-test)', 
                            'One-way ANOVA', 'Factorial ANOVA', 'ANCOVA', 'MANOVA', 'Repeated-measures ANOVA'];
                 } else if (secondChoice === "Predict Categorical Outcome") {
@@ -349,11 +368,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else if (thirdChoice === "Related/Repeated Measures") {
                     return ['Repeated-measures ANOVA'];
                 }
-            } else if (firstChoice === "Only Continuous Variables" && secondChoice === "Predict A Variable") {
-                if (thirdChoice === "Another Variable") {
-                    return ['Simple Linear Regression'];
-                } else if (thirdChoice === "Multiple Predictors") {
-                    return ['Multiple Linear Regression'];
+            } else if (firstChoice === "Only Continuous Variables") {
+                if (secondChoice === "Predict A Variable") {
+                    if (thirdChoice === "Another Variable") {
+                        return ['Simple Linear Regression'];
+                    } else if (thirdChoice === "Multiple Predictors") {
+                        return ['Multiple Linear Regression'];
+                    }
+                } else if (secondChoice === "Test Complex/Causal Models") {
+                    if (thirdChoice === "Only Observed Variables") {
+                        return ['Path Analysis'];
+                    } else if (thirdChoice === "Latent Variables (Factors)") {
+                        return ['Structural Equation Modeling(SEM)'];
+                    }
+                } else if (secondChoice === "Explain Mechanism (How/When)") {
+                    if (thirdChoice === "Explain HOW X affects Y (Process)") {
+                        return ['Mediation'];
+                    } else if (thirdChoice === "Explain WHEN X affects Y (Condition)") {
+                        return ['Moderation'];
+                    }
                 }
             }
         } else if (pathSelections.length === 4) {
@@ -470,7 +503,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         category = 'categorical';
                     } else if (option.result.includes('Linear Regression') || 
                              option.result === 'Correlation' || 
-                             option.result === 'Factor Analyses') {
+                             option.result === 'Factor Analysis' || 
+                             option.result === 'Mixture Modeling (LPA)' ||
+                             option.result === 'Path Analysis' ||
+                             option.result === 'Structural Equation Modeling(SEM)' ||
+                             option.result === 'Mediation' ||
+                             option.result === 'Moderation') {
                         category = 'continuous';
                     } else {
                         category = 'mixed';
