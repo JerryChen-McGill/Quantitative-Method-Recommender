@@ -556,7 +556,12 @@ document.addEventListener('DOMContentLoaded', () => {
             
             // 新增：添加点击事件
             methodItem.addEventListener('click', () => {
-                showMethodPath(method);
+                // 如果是Simple Linear Regression且为绿色高亮状态，跳转到教程页面
+                if (method === 'Simple Linear Regression' && methodItem.classList.contains('recommended')) {
+                    window.location.href = 'simpleLinearRegression.html';
+                } else {
+                    showMethodPath(method);
+                }
             });
             
             continuousGroup.appendChild(methodItem);

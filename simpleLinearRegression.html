@@ -1,0 +1,1803 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simple Linear Regression Tutorial - Progressive Learning</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px;
+            color: white;
+        }
+
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+        }
+
+        .level-progress {
+            position: sticky;
+            top: 0;
+            background: white;
+            padding: 15px;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .level-indicator {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .level-indicator.locked {
+            background: #e5e7eb;
+            color: #9ca3af;
+        }
+
+        .level-indicator.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        .level-indicator.completed {
+            background: #4ade80;
+            color: white;
+        }
+
+        .section {
+            background: white;
+            margin: 30px 0;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            position: relative;
+        }
+
+        .section.locked {
+            opacity: 0.5;
+            pointer-events: none;
+            filter: blur(3px);
+        }
+
+        .section.locked::after {
+            content: "🔒 Complete previous level to unlock";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0,0,0,0.8);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 15px;
+            font-size: 1.2em;
+            font-weight: bold;
+            z-index: 10;
+            filter: blur(0);
+        }
+
+        .section.active {
+            animation: fadeInUp 0.6s forwards;
+            opacity: 1;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2em;
+            border-left: 5px solid #667eea;
+            padding-left: 15px;
+        }
+
+        h3 {
+            color: #764ba2;
+            margin: 25px 0 15px 0;
+            font-size: 1.5em;
+        }
+
+        .level-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+
+        .beginner { background: #4ade80; color: white; }
+        .intermediate { background: #fbbf24; color: white; }
+        .advanced { background: #f87171; color: white; }
+        .master { background: #8b5cf6; color: white; }
+
+        .interactive-box {
+            background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+            border: 2px solid #667eea;
+        }
+
+        .canvas-container {
+            position: relative;
+            height: 400px;
+            margin: 20px 0;
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+
+        .control-group {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #e5e7eb;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            background: #764ba2;
+        }
+
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .formula {
+            background: #1e293b;
+            color: #4ade80;
+            padding: 20px;
+            border-radius: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 1.2em;
+            text-align: center;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .insight {
+            background: #fef3c7;
+            border-left: 5px solid #fbbf24;
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+
+        .insight::before {
+            content: "💡 ";
+            font-size: 1.5em;
+        }
+
+        .output {
+            background: #f3f4f6;
+            padding: 15px;
+            border-radius: 8px;
+            font-family: monospace;
+            margin: 10px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .example-box {
+            background: #e0e7ff;
+            border: 3px solid #667eea;
+            padding: 25px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .example-box h3 {
+            color: #667eea;
+            margin-top: 0;
+        }
+
+        .quiz-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 30px 0;
+            border: 3px solid #fbbf24;
+        }
+
+        .quiz-box h3 {
+            color: #d97706;
+            margin-top: 0;
+        }
+
+        .quiz-question {
+            margin: 20px 0;
+                padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .quiz-options {
+            margin: 15px 0;
+        }
+
+        .quiz-option {
+            display: block;
+            padding: 12px 20px;
+            margin: 10px 0;
+            background: #f3f4f6;
+            border: 2px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .quiz-option:hover {
+            background: #e5e7eb;
+            border-color: #667eea;
+        }
+
+        .quiz-option.selected {
+            background: #ddd6fe;
+            border-color: #8b5cf6;
+        }
+
+        .quiz-option.correct {
+            background: #d1fae5;
+            border-color: #4ade80;
+        }
+
+        .quiz-option.wrong {
+            background: #fee2e2;
+            border-color: #f87171;
+        }
+
+        .continue-button {
+            display: none;
+            background: linear-gradient(135deg, #4ade80 0%, #22c55e 100%);
+            font-size: 1.2em;
+            padding: 15px 40px;
+            margin: 30px auto;
+            animation: pulse 2s infinite;
+        }
+
+        .continue-button.show {
+            display: block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .feedback {
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .feedback.success {
+            background: #d1fae5;
+            color: #059669;
+            border: 2px solid #4ade80;
+        }
+
+        .feedback.error {
+            background: #fee2e2;
+            color: #dc2626;
+            border: 2px solid #f87171;
+        }
+
+        .highlight {
+            background: linear-gradient(120deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-weight: bold;
+        }
+
+        /* 彩带烟花动画 */
+        #confettiCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 9999;
+        }
+
+        @keyframes confettiFall {
+            to {
+                transform: translateY(100vh) rotate(720deg);
+            }
+        }
+
+        /* Back to Hub按钮样式 */
+        .back-to-hub {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            color: #667eea;
+            border: 2px solid #667eea;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.95em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            z-index: 1001;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .back-to-hub:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* 底部的Hub链接按钮 */
+        .hub-link-button {
+            background: white;
+            color: #667eea;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border: 2px solid #667eea;
+            padding: 12px 30px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .hub-link-button:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        @media (max-width: 768px) {
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2em;
+            }
+            
+            .section {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Back to Hub按钮 -->
+    <a href="index.html" class="back-to-hub">
+        <span>←</span> Back to Hub
+    </a>
+
+    <div class="level-progress" id="levelProgress">
+        <div class="level-indicator active" data-level="1">
+            <span>🎯</span> Level 1: Beginner
+        </div>
+        <div class="level-indicator locked" data-level="2">
+            <span>🔒</span> Level 2: Intermediate
+        </div>
+        <div class="level-indicator locked" data-level="3">
+            <span>🔒</span> Level 3: Advanced
+        </div>
+        <div class="level-indicator locked" data-level="4">
+            <span>🔒</span> Level 4: Master
+        </div>
+    </div>
+
+    <header>
+        <h1>📈 Simple Linear Regression</h1>
+        <p class="subtitle">Progressive Learning Journey - Master Each Level to Continue!</p>
+    </header>
+
+    <div class="container">
+        <!-- Level 1: Beginner -->
+        <div class="section active" id="level1" data-level="1">
+            <span class="level-badge beginner">LEVEL 1: BEGINNER</span>
+            <h2>🎯 What is Linear Regression?</h2>
+            <p>Imagine you're trying to predict something based on something else. Like predicting:</p>
+            <ul style="margin: 15px 0 15px 30px;">
+                <li>🏠 House price based on size</li>
+                <li>📊 Test scores based on study hours</li>
+                <li>💰 Salary based on years of experience</li>
+            </ul>
+            
+            <p style="margin-top: 20px;"><strong>Linear regression</strong> finds the <span class="highlight">"best fitting straight line"</span> through your data points. This line helps you make predictions!</p>
+
+            <div class="example-box">
+                <h3>☕ Real Example: Test Score vs Study Hours</h3>
+                <p><strong>Scenario:</strong> You're tracking how study hours affect test performance.</p>
+                <p style="margin-top: 10px;"><strong>Data collected:</strong></p>
+                <ul style="margin-left: 30px;">
+                    <li>2 hours → 65% score</li>
+                    <li>4 hours → 72% score</li>
+                    <li>6 hours → 78% score</li>
+                    <li>8 hours → 85% score</li>
+                    <li>10 hours → 92% score</li>
+                </ul>
+            </div>
+
+            <div class="interactive-box">
+                <h3>🎮 Interactive Demo: Create Your Regression Line!</h3>
+                <p>Click "Add Random Point" to add data, then calculate the best fit line!</p>
+                <div class="canvas-container">
+                    <canvas id="basicChart"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="addRandomPoint()">Add Random Point</button>
+                    <button onclick="clearPoints()">Clear All</button>
+                    <button onclick="calculateRegression()">Calculate Best Fit Line</button>
+                </div>
+                <div id="basicOutput" class="output" style="margin-top: 20px; display: none;"></div>
+            </div>
+
+            <div class="insight">
+                The "best fit line" minimizes the total distance between all points and the line itself. Think of it as finding the most "fair" line that represents all your data!
+        </div>
+
+            <!-- Level 1 Quiz -->
+            <div class="quiz-box">
+                <h3>🎓 Level 1 Test: Understanding Linear Regression Basics</h3>
+                <p><strong>Complete this test to unlock Level 2!</strong></p>
+
+                <div class="quiz-question" data-question="q1">
+                    <p><strong>Question 1:</strong> What does linear regression help us do?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q1"> <span data-correct="true">Make predictions based on data patterns</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q1"> <span data-correct="false">Create random data points</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q1"> <span data-correct="false">Delete outliers automatically</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q2">
+                    <p><strong>Question 2:</strong> The "best fit line" in linear regression:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q2"> <span data-correct="false">Always passes through all data points</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2"> <span data-correct="true">Minimizes the distance between points and the line</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2"> <span data-correct="false">Is always horizontal</span>
+                        </label>
+                </div>
+                </div>
+
+                <div class="quiz-question" data-question="q3">
+                    <p><strong>Question 3:</strong> Add at least 5 points in the interactive demo above and calculate the regression line to answer: Did you see a line appear after calculation?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q3"> <span data-correct="true">Yes, I completed the demo</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3"> <span data-correct="false">No, not yet</span>
+                        </label>
+                    </div>
+            </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="checkLevel1Quiz()">Submit Test</button>
+                </div>
+                <div id="level1Feedback"></div>
+            </div>
+
+            <button class="continue-button" id="continue1" onclick="unlockLevel(2)">
+                🚀 Continue to Level 2: Intermediate
+            </button>
+        </div>
+
+        <!-- Level 2: Intermediate -->
+        <div class="section locked" id="level2" data-level="2">
+            <span class="level-badge intermediate">LEVEL 2: INTERMEDIATE</span>
+            <h2>🧮 The Math Behind the Magic</h2>
+            
+            <p>Every straight line can be described by a simple equation:</p>
+            <div class="formula">
+                y = mx + b
+            </div>
+            
+            <div class="grid-2">
+                <div>
+                    <h3>What do these mean?</h3>
+                    <ul style="margin-left: 30px;">
+                        <li><strong>y</strong> = what we're predicting (test score)</li>
+                        <li><strong>x</strong> = what we know (study hours)</li>
+                        <li><strong>m</strong> = slope (how steep the line is)</li>
+                        <li><strong>b</strong> = y-intercept (score with 0 hours)</li>
+                    </ul>
+                </div>
+                <div>
+                    <h3>In statistics, we write it as:</h3>
+                    <div class="formula" style="font-size: 1em;">
+                        ŷ = β₀ + β₁x
+                    </div>
+                    <p style="margin-top: 15px;">Same thing, fancier notation! β₀ is the intercept and β₁ is the slope.</p>
+                </div>
+            </div>
+
+            <div class="example-box">
+                <h3>📚 Study Hours Example Math</h3>
+                <p>For study hours vs test score, the equation might look like:</p>
+                <div class="formula">
+                    Test Score = 50 + 4.2 × (Study Hours)
+                </div>
+                <p style="margin-top: 15px;"><strong>Interpretation:</strong></p>
+                <ul style="margin-left: 30px;">
+                    <li>β₀ = 50 means with 0 hours study, you'd score around 50%</li>
+                    <li>β₁ = 4.2 means each hour of study adds 4.2 points to your score</li>
+                </ul>
+            </div>
+
+            <div class="interactive-box">
+                <h3>🎮 Play with Slope and Intercept</h3>
+                <p>Adjust the sliders to see how slope and intercept affect the line!</p>
+                <div class="controls">
+                    <div class="control-group">
+                        <label>Slope (m): <span id="slopeValue">1.0</span></label>
+                        <input type="range" id="slopeSlider" min="-3" max="3" step="0.1" value="1">
+                    </div>
+                    <div class="control-group">
+                        <label>Intercept (b): <span id="interceptValue">0</span></label>
+                        <input type="range" id="interceptSlider" min="-50" max="50" step="1" value="0">
+                    </div>
+                </div>
+                <div class="canvas-container">
+                    <canvas id="slopeChart"></canvas>
+                </div>
+                <div class="output" style="margin-top: 20px;">
+                    <strong>Current Equation:</strong> y = <span id="currentEquation">1.0x + 0</span>
+                </div>
+            </div>
+
+            <div class="insight">
+                <strong>Slope tells you the relationship:</strong> If study hours increase by 1, how much does the test score increase? That's your slope!
+            </div>
+
+            <!-- Level 2 Quiz -->
+            <div class="quiz-box">
+                <h3>🎓 Level 2 Test: Understanding the Equation</h3>
+                <p><strong>Complete this test to unlock Level 3!</strong></p>
+
+                <div class="quiz-question" data-question="q2_1">
+                    <p><strong>Question 1:</strong> In the equation y = mx + b, what does 'm' represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_1"> <span data-correct="true">The slope of the line</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_1"> <span data-correct="false">The y-intercept</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_1"> <span data-correct="false">The x value</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q2_2">
+                    <p><strong>Question 2:</strong> If the equation is y = 3x + 10, what is y when x = 5?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_2"> <span data-correct="false">15</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_2"> <span data-correct="true">25</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_2"> <span data-correct="false">35</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q2_3">
+                    <p><strong>Question 3:</strong> Using the sliders above, create a line with slope = 2 and intercept = 10. What does this line represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_3"> <span data-correct="true">For every 1 unit increase in x, y increases by 2, starting at y = 10 when x = 0</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_3"> <span data-correct="false">A horizontal line at y = 2</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q2_3"> <span data-correct="false">A vertical line at x = 10</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="checkLevel2Quiz()">Submit Test</button>
+                </div>
+                <div id="level2Feedback"></div>
+            </div>
+
+            <button class="continue-button" id="continue2" onclick="unlockLevel(3)">
+                🚀 Continue to Level 3: Advanced
+            </button>
+        </div>
+
+        <!-- Level 3: Advanced -->
+        <div class="section locked" id="level3" data-level="3">
+            <span class="level-badge advanced">LEVEL 3: ADVANCED</span>
+            <h2>🎯 How Good is Your Line? (R² Score)</h2>
+            
+            <p>Not all lines are created equal! We need a way to measure how well our line fits the data. Enter: <span class="highlight">R² (R-squared)</span></p>
+
+            <div class="formula">
+                R² = 1 - (Sum of Squared Residuals / Total Sum of Squares)
+            </div>
+
+            <h3>What's a Residual?</h3>
+            <p>A <strong>residual</strong> is the distance between an actual point and the predicted point on the line. It's how much we "missed" by!</p>
+
+            <div class="example-box">
+                <h3>📚 Understanding Residuals</h3>
+                <p>If a student studied 6 hours and scored 78%, but our line predicts 75%:</p>
+                <p style="margin-top: 10px;"><strong>Residual = Actual - Predicted = 78% - 75% = 3%</strong></p>
+                <p style="margin-top: 10px;">A small residual means our prediction was close! Large residuals mean poor predictions.</p>
+            </div>
+
+            <div class="interactive-box">
+                <h3>🎮 Visualize Residuals</h3>
+                <p>Generate datasets and see how R² measures the fit quality:</p>
+                <div class="canvas-container">
+                    <canvas id="residualChart"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="generateDataset('good')">🌟 Generate Good Fit (High R²)</button>
+                    <button onclick="generateDataset('medium')">⚠️ Generate Medium Fit</button>
+                    <button onclick="generateDataset('poor')">❌ Generate Poor Fit (Low R²)</button>
+                </div>
+                <div id="r2Output" class="output" style="margin-top: 20px;"></div>
+            </div>
+
+            <h3>Understanding R² Values:</h3>
+            <ul style="margin-left: 30px;">
+                <li><strong style="color: #22c55e;">R² = 0.95-1.0</strong>: 🌟 Excellent fit! Very strong linear relationship - points are very close to the line</li>
+                <li><strong style="color: #16a34a;">R² = 0.85-0.94</strong>: ✅ Good fit! Strong relationship - most points near the line</li>
+                <li><strong style="color: #fbbf24;">R² = 0.5-0.7</strong>: ⚠️ Moderate fit - Some linear relationship exists but with notable scatter</li>
+                <li><strong style="color: #ef4444;">R² = 0-0.4</strong>: ❌ Poor fit - Weak or no linear relationship, points far from line</li>
+            </ul>
+
+            <div class="insight">
+                R² tells you what percentage of the variation in y is explained by x. An R² of 0.75 means 75% of the variation is explained by your model. The other 25% is due to other factors!
+            </div>
+
+            <!-- Level 3 Quiz -->
+            <div class="quiz-box">
+                <h3>🎓 Level 3 Test: Understanding Model Quality</h3>
+                <p><strong>Complete this test to unlock Level 4!</strong></p>
+
+                <div class="quiz-question" data-question="q3_1">
+                    <p><strong>Question 1:</strong> What does a residual represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_1"> <span data-correct="true">The difference between actual and predicted values</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_1"> <span data-correct="false">The slope of the line</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_1"> <span data-correct="false">The total number of data points</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q3_2">
+                    <p><strong>Question 2:</strong> An R² value of 0.85 means:</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_2"> <span data-correct="false">The model is 85% wrong</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_2"> <span data-correct="true">85% of the variation in y is explained by x</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_2"> <span data-correct="false">There are 85 data points</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q3_3">
+                    <p><strong>Question 3:</strong> Use the buttons above to generate different datasets. Which has the highest R²?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_3"> <span data-correct="false">Medium Fit dataset</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_3"> <span data-correct="false">Poor Fit dataset</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q3_3"> <span data-correct="true">Good Fit dataset</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="checkLevel3Quiz()">Submit Test</button>
+                </div>
+                <div id="level3Feedback"></div>
+            </div>
+
+            <button class="continue-button" id="continue3" onclick="unlockLevel(4)">
+                🚀 Continue to Level 4: Master
+            </button>
+        </div>
+
+        <!-- Level 4: Master -->
+        <div class="section locked" id="level4" data-level="4">
+            <span class="level-badge master">LEVEL 4: MASTER</span>
+            <h2>🧙‍♂️ The Mathematics of Finding the Best Line</h2>
+            
+            <p>How does the computer actually find the "best" line? It uses <span class="highlight">Ordinary Least Squares (OLS)</span> - a method that minimizes the sum of squared residuals.</p>
+
+            <h3>The Formulas:</h3>
+            <div class="formula">
+                β₁ = Σ((xᵢ - x̄)(yᵢ - ȳ)) / Σ(xᵢ - x̄)²
+            </div>
+            <div class="formula">
+                β₀ = ȳ - β₁x̄
+            </div>
+
+            <p style="margin-top: 20px;">Where x̄ and ȳ are the means (averages) of x and y values.</p>
+
+            <div class="interactive-box">
+                <h3>🎮 Calculate Regression Step-by-Step</h3>
+                <p>Let's calculate regression using our study hours example!</p>
+                <div class="canvas-container">
+                    <canvas id="masterChart"></canvas>
+                </div>
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="calculateStepByStep()">Calculate Step-by-Step</button>
+                </div>
+                <div id="stepOutput" class="output" style="margin-top: 20px; display: none;"></div>
+            </div>
+
+            <h3>Key Assumptions of Linear Regression:</h3>
+            <ul style="margin-left: 30px; margin-top: 15px;">
+                <li><strong>Linearity:</strong> The relationship between X and Y is linear</li>
+                <li><strong>Independence:</strong> Observations are independent of each other</li>
+                <li><strong>Homoscedasticity:</strong> Variance of residuals is constant</li>
+                <li><strong>Normality:</strong> Residuals are normally distributed</li>
+            </ul>
+
+            <div class="insight">
+                <strong>Pro Tip:</strong> Always check these assumptions! If they're violated, your predictions might be unreliable. Use visualizations and statistical tests to verify.
+            </div>
+
+            <!-- Level 4 Quiz -->
+            <div class="quiz-box">
+                <h3>🎓 Final Master Test: Advanced Concepts</h3>
+                <p><strong>Complete this test to finish your journey!</strong></p>
+
+                <div class="quiz-question" data-question="q4_1">
+                    <p><strong>Question 1:</strong> What does "Ordinary Least Squares" minimize?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_1"> <span data-correct="false">The number of data points</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_1"> <span data-correct="true">The sum of squared residuals</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_1"> <span data-correct="false">The slope value</span>
+                        </label>
+            </div>
+        </div>
+
+                <div class="quiz-question" data-question="q4_2">
+                    <p><strong>Question 2:</strong> In the formula β₁ = Σ((xᵢ - x̄)(yᵢ - ȳ)) / Σ(xᵢ - x̄)², what does x̄ represent?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_2"> <span data-correct="false">The maximum x value</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_2"> <span data-correct="false">The first x value</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_2"> <span data-correct="true">The mean (average) of x values</span>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="quiz-question" data-question="q4_3">
+                    <p><strong>Question 3:</strong> Why is it important to check the assumptions of linear regression?</p>
+                    <div class="quiz-options">
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_3"> <span data-correct="false">To make the calculations faster</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_3"> <span data-correct="true">To ensure predictions are reliable and the model is appropriate</span>
+                        </label>
+                        <label class="quiz-option">
+                            <input type="radio" name="q4_3"> <span data-correct="false">To increase the R² value</span>
+                        </label>
+                    </div>
+                    </div>
+
+                <div style="text-align: center; margin-top: 20px;">
+                    <button onclick="checkLevel4Quiz()">Submit Final Test</button>
+                </div>
+                <div id="level4Feedback"></div>
+            </div>
+
+            <button class="continue-button" id="continue4" onclick="showCompletion()">
+                🎓 Complete Your Journey!
+            </button>
+        </div>
+
+        <!-- Completion Section -->
+        <div class="section" id="completion" style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; display: none;">
+            <h2 style="color: white; border: none;">🎓 Congratulations!</h2>
+            <p style="font-size: 1.5em; margin: 20px 0;">You've completed the entire Progressive Linear Regression Journey!</p>
+            <p style="font-size: 1.2em;">You've mastered:</p>
+            <ul style="list-style: none; font-size: 1.1em; margin: 20px 0;">
+                <li>✅ Basic concepts of linear regression</li>
+                <li>✅ The mathematical equation (y = mx + b)</li>
+                <li>✅ Model quality evaluation (R²)</li>
+                <li>✅ Advanced calculations (OLS method)</li>
+            </ul>
+            <p style="font-size: 1.2em; margin-top: 30px;">Keep practicing and exploring. The best way to learn is by doing! 🚀</p>
+            <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+                <button onclick="resetProgress()" style="background: white; color: #667eea; border: 2px solid #667eea;">🔄 Restart Journey</button>
+                <a href="index.html" class="hub-link-button">
+                    <span>←</span> Back to Hub
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- 彩带动画画布 -->
+    <canvas id="confettiCanvas"></canvas>
+
+    <script>
+        let basicData = [];
+        let basicChart, slopeChart, residualChart, masterChart;
+        let currentLevel = 1;
+        let completedLevels = new Set();
+        let studyData = [
+            {x: 2, y: 65},
+            {x: 4, y: 72},
+            {x: 6, y: 78},
+            {x: 8, y: 85},
+            {x: 10, y: 92}
+        ];
+
+        window.onload = function() {
+            initBasicChart();
+            initSlopeChart();
+            initResidualChart();
+            initMasterChart();
+            randomizeAllQuestions(); // 随机化所有题目的选项顺序
+            loadProgress();
+        };
+
+        // 随机化题目选项的通用函数
+        function randomizeAllQuestions() {
+            const allQuestions = document.querySelectorAll('.quiz-question');
+            allQuestions.forEach(question => {
+                const optionsContainer = question.querySelector('.quiz-options');
+                const options = Array.from(optionsContainer.querySelectorAll('.quiz-option'));
+                
+                // 使用 Fisher-Yates 洗牌算法随机打乱选项
+                for (let i = options.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [options[i], options[j]] = [options[j], options[i]];
+                }
+                
+                // 清空并按新顺序重新添加选项
+                optionsContainer.innerHTML = '';
+                options.forEach(option => {
+                    optionsContainer.appendChild(option);
+                });
+            });
+        }
+
+        // 检查选中的选项是否正确的通用函数
+        function isAnswerCorrect(questionName) {
+            const selectedOption = document.querySelector(`input[name="${questionName}"]:checked`);
+            if (!selectedOption) return false;
+            
+            const selectedSpan = selectedOption.nextElementSibling;
+            return selectedSpan && selectedSpan.getAttribute('data-correct') === 'true';
+        }
+
+        function loadProgress() {
+            const saved = localStorage.getItem('regressionProgress');
+            if (saved) {
+                const progress = JSON.parse(saved);
+                currentLevel = progress.currentLevel || 1;
+                completedLevels = new Set(progress.completedLevels || []);
+                
+                completedLevels.forEach(level => {
+                    updateLevelIndicator(level, 'completed');
+                });
+                
+                if (currentLevel > 1) {
+                    for (let i = 1; i < currentLevel; i++) {
+                        document.getElementById(`level${i}`).classList.remove('active');
+                        document.getElementById(`level${i}`).classList.add('locked');
+                    }
+                    unlockLevel(currentLevel);
+                }
+            }
+        }
+
+        function saveProgress() {
+            localStorage.setItem('regressionProgress', JSON.stringify({
+                currentLevel: currentLevel,
+                completedLevels: Array.from(completedLevels)
+            }));
+        }
+
+        function updateLevelIndicator(level, status) {
+            const indicator = document.querySelector(`[data-level="${level}"].level-indicator`);
+            indicator.classList.remove('locked', 'active', 'completed');
+            indicator.classList.add(status);
+            
+            const icon = indicator.querySelector('span');
+            if (status === 'completed') {
+                icon.textContent = '✅';
+            } else if (status === 'active') {
+                icon.textContent = '🎯';
+            } else {
+                icon.textContent = '🔒';
+            }
+        }
+
+        function unlockLevel(level) {
+            const section = document.getElementById(`level${level}`);
+            section.classList.remove('locked');
+            section.classList.add('active');
+            
+            updateLevelIndicator(level, 'active');
+            
+            currentLevel = level;
+            saveProgress();
+            
+            section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        function completeLevel(level) {
+            completedLevels.add(level);
+            updateLevelIndicator(level, 'completed');
+            document.getElementById(`continue${level}`).classList.add('show');
+            saveProgress();
+        }
+
+        // Level 1 Functions
+        function initBasicChart() {
+            const ctx = document.getElementById('basicChart').getContext('2d');
+            basicChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Data Points',
+                        data: basicData,
+                        backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    onClick: (e) => {
+                        const rect = e.chart.canvas.getBoundingClientRect();
+                        const x = e.native.clientX - rect.left;
+                        const y = e.native.clientY - rect.top;
+                        const xValue = e.chart.scales.x.getValueForPixel(x);
+                        const yValue = e.chart.scales.y.getValueForPixel(y);
+                        if (xValue >= 0 && xValue <= 100 && yValue >= 0 && yValue <= 100) {
+                            basicData.push({x: xValue, y: yValue});
+                            basicChart.update('none'); // 禁用动画，点直接显示
+                        }
+                    },
+                    scales: {
+                        x: { min: 0, max: 100, title: { display: true, text: 'X Value' } },
+                        y: { min: 0, max: 100, title: { display: true, text: 'Y Value' } }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+        }
+
+        function addRandomPoint() {
+            const x = Math.random() * 100;
+            const y = 20 + 0.6 * x + (Math.random() - 0.5) * 30;
+            basicData.push({x: x, y: y});
+            basicChart.update('none'); // 禁用动画，点直接显示
+        }
+
+        function clearPoints() {
+            basicData = [];
+            basicChart.data.datasets = [{
+                label: 'Data Points',
+                data: basicData,
+                backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                pointRadius: 8
+            }];
+            document.getElementById('basicOutput').style.display = 'none';
+            basicChart.update('none'); // 禁用动画
+        }
+
+        function calculateRegression() {
+            if (basicData.length < 2) {
+                alert('Please add at least 2 points!');
+                return;
+            }
+
+            const result = performRegression(basicData);
+            const lineData = [
+                {x: 0, y: result.intercept},
+                {x: 100, y: result.slope * 100 + result.intercept}
+            ];
+
+            basicChart.data.datasets = [
+                {
+                    label: 'Data Points',
+                    data: basicData,
+                    backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                    pointRadius: 8
+                },
+                {
+                    label: 'Best Fit Line',
+                    data: lineData,
+                    type: 'line',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                }
+            ];
+
+            // 禁用动画，让回归线直接显示
+            basicChart.update('none');
+
+            document.getElementById('basicOutput').innerHTML = `
+                <strong>Regression Results:</strong><br>
+                Equation: y = ${result.slope.toFixed(2)}x + ${result.intercept.toFixed(2)}<br>
+                Slope (m): ${result.slope.toFixed(2)}<br>
+                Intercept (b): ${result.intercept.toFixed(2)}<br>
+                R² Score: ${result.r2.toFixed(4)} (${(result.r2 * 100).toFixed(2)}% of variation explained)
+            `;
+            document.getElementById('basicOutput').style.display = 'block';
+        }
+
+        function performRegression(data) {
+            const n = data.length;
+            let sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
+
+            data.forEach(point => {
+                sumX += point.x;
+                sumY += point.y;
+                sumXY += point.x * point.y;
+                sumX2 += point.x * point.x;
+            });
+
+            const slope = (n * sumXY - sumX * sumY) / (n * sumX2 - sumX * sumX);
+            const intercept = (sumY - slope * sumX) / n;
+
+            const meanY = sumY / n;
+            let ssRes = 0, ssTot = 0;
+            data.forEach(point => {
+                const predicted = slope * point.x + intercept;
+                ssRes += Math.pow(point.y - predicted, 2);
+                ssTot += Math.pow(point.y - meanY, 2);
+            });
+            const r2 = 1 - (ssRes / ssTot);
+
+            return { slope, intercept, r2 };
+        }
+
+        function checkLevel1Quiz() {
+            const q1 = document.querySelector('input[name="q1"]:checked');
+            const q2 = document.querySelector('input[name="q2"]:checked');
+            const q3 = document.querySelector('input[name="q3"]:checked');
+
+            if (!q1 || !q2 || !q3) {
+                showFeedback('level1Feedback', 'Please answer all questions!', 'error');
+                return;
+            }
+
+            const q1Correct = isAnswerCorrect('q1');
+            const q2Correct = isAnswerCorrect('q2');
+            const q3Correct = isAnswerCorrect('q3');
+            const allCorrect = q1Correct && q2Correct && q3Correct;
+
+            if (allCorrect) {
+                showFeedback('level1Feedback', '🎉 Perfect! You\'ve mastered Level 1! Click the continue button below to proceed.', 'success');
+                completeLevel(1);
+            } else {
+                let feedback = '❌ Not quite right. Review the material and try again!<br><br>';
+                if (!q1Correct) feedback += '• Question 1: Linear regression helps make predictions based on patterns.<br>';
+                if (!q2Correct) feedback += '• Question 2: The best fit line minimizes distances to points.<br>';
+                if (!q3Correct) feedback += '• Question 3: Try the interactive demo above!<br>';
+                showFeedback('level1Feedback', feedback, 'error');
+            }
+        }
+
+        // Level 2 Functions
+        function initSlopeChart() {
+            const ctx = document.getElementById('slopeChart').getContext('2d');
+            const sampleData = [
+                {x: 10, y: 25}, {x: 20, y: 35}, {x: 30, y: 42},
+                {x: 40, y: 55}, {x: 50, y: 62}, {x: 60, y: 70},
+                {x: 70, y: 78}, {x: 80, y: 88}
+            ];
+
+            slopeChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Data Points',
+                            data: sampleData,
+                            backgroundColor: 'rgba(102, 126, 234, 0.8)',
+                            pointRadius: 8
+                        },
+                        {
+                            label: 'Your Line',
+                            data: [{x: 0, y: 0}, {x: 100, y: 100}],
+                            type: 'line',
+                            borderColor: 'rgba(239, 68, 68, 1)',
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { min: 0, max: 100, title: { display: true, text: 'X' } },
+                        y: { min: -50, max: 150, title: { display: true, text: 'Y' } }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+
+            document.getElementById('slopeSlider').addEventListener('input', updateLine);
+            document.getElementById('interceptSlider').addEventListener('input', updateLine);
+        }
+
+        function updateLine() {
+            const slope = parseFloat(document.getElementById('slopeSlider').value);
+            const intercept = parseFloat(document.getElementById('interceptSlider').value);
+
+            document.getElementById('slopeValue').textContent = slope.toFixed(1);
+            document.getElementById('interceptValue').textContent = intercept.toFixed(0);
+            document.getElementById('currentEquation').textContent = `${slope.toFixed(1)}x + ${intercept.toFixed(0)}`;
+
+            const lineData = [
+                {x: 0, y: intercept},
+                {x: 100, y: slope * 100 + intercept}
+            ];
+
+            slopeChart.data.datasets[1].data = lineData;
+            slopeChart.update('none'); // 禁用动画，让滑块拖动时线条实时更新
+        }
+
+        function checkLevel2Quiz() {
+            const q1 = document.querySelector('input[name="q2_1"]:checked');
+            const q2 = document.querySelector('input[name="q2_2"]:checked');
+            const q3 = document.querySelector('input[name="q2_3"]:checked');
+
+            if (!q1 || !q2 || !q3) {
+                showFeedback('level2Feedback', 'Please answer all questions!', 'error');
+                return;
+            }
+
+            const q1Correct = isAnswerCorrect('q2_1');
+            const q2Correct = isAnswerCorrect('q2_2');
+            const q3Correct = isAnswerCorrect('q2_3');
+            const allCorrect = q1Correct && q2Correct && q3Correct;
+
+            if (allCorrect) {
+                showFeedback('level2Feedback', '🎉 Excellent! You understand the equation! Click continue to proceed.', 'success');
+                completeLevel(2);
+            } else {
+                let feedback = '❌ Not quite right. Let\'s review:<br><br>';
+                if (!q1Correct) feedback += '• Question 1: m is the slope!<br>';
+                if (!q2Correct) feedback += '• Question 2: y = 3(5) + 10 = 15 + 10 = 25<br>';
+                if (!q3Correct) feedback += '• Question 3: Slope tells how much y changes per unit of x.<br>';
+                showFeedback('level2Feedback', feedback, 'error');
+            }
+        }
+
+        // Level 3 Functions
+        function initResidualChart() {
+            generateDataset('medium');
+        }
+
+        function generateDataset(quality) {
+            const data = [];
+            // 大幅增加噪声差异，让三种情况更明显
+            // good: 极小噪声 (R² ≈ 0.95+), medium: 中等噪声 (R² ≈ 0.5-0.7), poor: 大噪声 (R² ≈ 0.2-0.4)
+            let noise = quality === 'good' ? 3 : quality === 'medium' ? 28 : 55;
+            
+            for (let i = 0; i < 10; i++) {
+                const x = i * 10 + 10;
+                const y = 20 + 0.7 * x + (Math.random() - 0.5) * noise;
+                data.push({x, y});
+            }
+
+            const result = performRegression(data);
+            const lineData = [
+                {x: 0, y: result.intercept},
+                {x: 100, y: result.slope * 100 + result.intercept}
+            ];
+
+            const ctx = document.getElementById('residualChart').getContext('2d');
+            
+            if (residualChart) {
+                residualChart.destroy();
+            }
+
+            // 根据质量设置不同的颜色，让差异更明显
+            let pointColor, lineColor;
+            if (quality === 'good') {
+                pointColor = 'rgba(34, 197, 94, 0.8)';  // 绿色 - 好
+                lineColor = 'rgba(34, 197, 94, 1)';
+            } else if (quality === 'medium') {
+                pointColor = 'rgba(251, 191, 36, 0.8)';  // 黄色 - 中等
+                lineColor = 'rgba(251, 191, 36, 1)';
+            } else {
+                pointColor = 'rgba(239, 68, 68, 0.8)';  // 红色 - 差
+                lineColor = 'rgba(239, 68, 68, 1)';
+            }
+
+            residualChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [
+                        {
+                            label: 'Data Points',
+                            data: data,
+                            backgroundColor: pointColor,
+                            pointRadius: 10
+                        },
+                        {
+                            label: 'Regression Line',
+                            data: lineData,
+                            type: 'line',
+                            borderColor: lineColor,
+                            borderWidth: 3,
+                            pointRadius: 0,
+                            fill: false
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false, // 禁用动画，点和线直接显示
+                    scales: {
+                        x: { min: 0, max: 100, title: { display: true, text: 'X' } },
+                        y: { min: 0, max: 100, title: { display: true, text: 'Y' } }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+
+            let qualityText, qualityEmoji, qualityColor;
+            if (result.r2 > 0.85) {
+                qualityText = 'Excellent - Very Strong Linear Relationship';
+                qualityEmoji = '🌟';
+                qualityColor = '#22c55e';
+            } else if (result.r2 > 0.5) {
+                qualityText = 'Moderate - Some Linear Relationship';
+                qualityEmoji = '⚠️';
+                qualityColor = '#fbbf24';
+            } else {
+                qualityText = 'Poor - Weak Linear Relationship';
+                qualityEmoji = '❌';
+                qualityColor = '#f87171';
+            }
+            
+            document.getElementById('r2Output').innerHTML = `
+                <strong>Results (${quality} fit):</strong><br>
+                Equation: y = ${result.slope.toFixed(2)}x + ${result.intercept.toFixed(2)}<br>
+                <strong style="font-size: 1.2em;">R² Score: ${result.r2.toFixed(4)} (${(result.r2 * 100).toFixed(2)}% of variation explained)</strong><br>
+                <strong style="color: ${qualityColor}; font-size: 1.1em;">${qualityEmoji} Fit Quality: ${qualityText}</strong><br><br>
+                <em>The distance between points and the line represents residuals (prediction errors).</em><br>
+                <em>${result.r2 > 0.85 ? 'Points are very close to the line! 🎯' : result.r2 > 0.5 ? 'Points are scattered moderately around the line.' : 'Points are far from the line - poor predictions! 📉'}</em>
+            `;
+            document.getElementById('r2Output').style.display = 'block';
+        }
+
+        function checkLevel3Quiz() {
+            const q1 = document.querySelector('input[name="q3_1"]:checked');
+            const q2 = document.querySelector('input[name="q3_2"]:checked');
+            const q3 = document.querySelector('input[name="q3_3"]:checked');
+
+            if (!q1 || !q2 || !q3) {
+                showFeedback('level3Feedback', 'Please answer all questions!', 'error');
+                return;
+            }
+
+            const q1Correct = isAnswerCorrect('q3_1');
+            const q2Correct = isAnswerCorrect('q3_2');
+            const q3Correct = isAnswerCorrect('q3_3');
+            const allCorrect = q1Correct && q2Correct && q3Correct;
+
+            if (allCorrect) {
+                showFeedback('level3Feedback', '🎉 Outstanding! You understand model quality! Ready for the final level?', 'success');
+                completeLevel(3);
+            } else {
+                let feedback = '❌ Review the concepts:<br><br>';
+                if (!q1Correct) feedback += '• Question 1: Residual = Actual - Predicted<br>';
+                if (!q2Correct) feedback += '• Question 2: R² = 0.85 means 85% of variation is explained<br>';
+                if (!q3Correct) feedback += '• Question 3: Good Fit has the highest R²!<br>';
+                showFeedback('level3Feedback', feedback, 'error');
+            }
+        }
+
+        // Level 4 Functions
+        function initMasterChart() {
+            const ctx = document.getElementById('masterChart').getContext('2d');
+            masterChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Study Hours vs Test Score',
+                        data: studyData,
+                        backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                        pointRadius: 10,
+                        pointHoverRadius: 12
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: { min: 0, max: 12, title: { display: true, text: 'Study Hours' } },
+                        y: { min: 50, max: 100, title: { display: true, text: 'Test Score (%)' } }
+                    },
+                    plugins: {
+                        legend: { display: true }
+                    }
+                }
+            });
+        }
+
+        function calculateStepByStep() {
+            const data = studyData;
+            const n = data.length;
+            
+            let sumX = 0, sumY = 0;
+            data.forEach(point => {
+                sumX += point.x;
+                sumY += point.y;
+            });
+            const meanX = sumX / n;
+            const meanY = sumY / n;
+
+            let numerator = 0, denominator = 0;
+            data.forEach(point => {
+                numerator += (point.x - meanX) * (point.y - meanY);
+                denominator += Math.pow(point.x - meanX, 2);
+            });
+
+            const slope = numerator / denominator;
+            const intercept = meanY - slope * meanX;
+
+            const lineData = [
+                {x: 0, y: intercept},
+                {x: 12, y: slope * 12 + intercept}
+            ];
+
+            masterChart.data.datasets = [
+                {
+                    label: 'Study Hours vs Test Score',
+                    data: studyData,
+                    backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                    pointRadius: 10
+                },
+                {
+                    label: 'Calculated Regression Line',
+                    data: lineData,
+                    type: 'line',
+                    borderColor: 'rgba(239, 68, 68, 1)',
+                    borderWidth: 3,
+                    pointRadius: 0,
+                    fill: false
+                }
+            ];
+            masterChart.update('none'); // 禁用动画，回归线直接显示
+
+            const meanYCalc = sumY / n;
+            let ssRes = 0, ssTot = 0;
+            data.forEach(point => {
+                const predicted = slope * point.x + intercept;
+                ssRes += Math.pow(point.y - predicted, 2);
+                ssTot += Math.pow(point.y - meanYCalc, 2);
+            });
+            const r2 = 1 - (ssRes / ssTot);
+
+            document.getElementById('stepOutput').innerHTML = `
+                <strong>Step-by-Step Calculation:</strong><br><br>
+                <strong>Data Points:</strong> ${data.map(d => `(${d.x}, ${d.y})`).join(', ')}<br><br>
+                
+                <strong>Step 1: Calculate Means</strong><br>
+                x̄ = (${data.map(d => d.x).join(' + ')}) / ${n} = ${meanX.toFixed(2)} hours<br>
+                ȳ = (${data.map(d => d.y).join(' + ')}) / ${n} = ${meanY.toFixed(2)}%<br><br>
+                
+                <strong>Step 2: Calculate Slope (β₁)</strong><br>
+                β₁ = Σ((xᵢ - x̄)(yᵢ - ȳ)) / Σ(xᵢ - x̄)²<br>
+                Numerator = ${numerator.toFixed(2)}<br>
+                Denominator = ${denominator.toFixed(2)}<br>
+                β₁ = ${slope.toFixed(4)} points per hour<br><br>
+                
+                <strong>Step 3: Calculate Intercept (β₀)</strong><br>
+                β₀ = ȳ - β₁x̄<br>
+                β₀ = ${meanY.toFixed(2)} - ${slope.toFixed(4)} × ${meanX.toFixed(2)}<br>
+                β₀ = ${intercept.toFixed(2)}%<br><br>
+                
+                <strong>Final Equation:</strong><br>
+                Test Score = ${intercept.toFixed(2)} + ${slope.toFixed(4)} × Study Hours<br><br>
+                
+                <strong>Interpretation:</strong> Each hour of study adds about ${slope.toFixed(2)} points to your score!<br><br>
+                
+                <strong>Model Quality (R²):</strong> ${r2.toFixed(4)} (${(r2 * 100).toFixed(2)}% - Excellent fit!)
+            `;
+            document.getElementById('stepOutput').style.display = 'block';
+        }
+
+        function checkLevel4Quiz() {
+            const q1 = document.querySelector('input[name="q4_1"]:checked');
+            const q2 = document.querySelector('input[name="q4_2"]:checked');
+            const q3 = document.querySelector('input[name="q4_3"]:checked');
+
+            if (!q1 || !q2 || !q3) {
+                showFeedback('level4Feedback', 'Please answer all questions!', 'error');
+                return;
+            }
+
+            const q1Correct = isAnswerCorrect('q4_1');
+            const q2Correct = isAnswerCorrect('q4_2');
+            const q3Correct = isAnswerCorrect('q4_3');
+            const allCorrect = q1Correct && q2Correct && q3Correct;
+
+            if (allCorrect) {
+                showFeedback('level4Feedback', '🎉 CONGRATULATIONS! You\'ve mastered Linear Regression! Click below to complete your journey!', 'success');
+                completeLevel(4);
+            } else {
+                let feedback = '❌ Almost there! Review:<br><br>';
+                if (!q1Correct) feedback += '• Question 1: OLS minimizes sum of squared residuals<br>';
+                if (!q2Correct) feedback += '• Question 2: x̄ is the mean of x values<br>';
+                if (!q3Correct) feedback += '• Question 3: Assumptions ensure reliable predictions<br>';
+                showFeedback('level4Feedback', feedback, 'error');
+            }
+        }
+
+        // Utility Functions
+        function showFeedback(elementId, message, type) {
+            const element = document.getElementById(elementId);
+            element.innerHTML = `<div class="feedback ${type}">${message}</div>`;
+            element.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showCompletion() {
+            // Level 4 不消失，只显示 Congratulations
+            const completion = document.getElementById('completion');
+            completion.style.display = 'block';
+            completion.classList.remove('locked');
+            completion.scrollIntoView({ behavior: 'smooth' });
+            
+            // 更新级别指示器
+            updateLevelIndicator(4, 'completed');
+            
+            // 触发彩带烟花动画
+            launchConfetti();
+            
+            // 播放庆祝音乐
+            playCelebrationMusic();
+        }
+
+        // 彩带烟花动画函数
+        function launchConfetti() {
+            const canvas = document.getElementById('confettiCanvas');
+            const ctx = canvas.getContext('2d');
+            
+            // 设置画布大小
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            
+            // 彩带粒子数组
+            const confetti = [];
+            const confettiCount = 150;
+            const colors = ['#667eea', '#764ba2', '#4ade80', '#fbbf24', '#f87171', '#8b5cf6', '#ec4899', '#06b6d4'];
+            
+            // 创建彩带粒子
+            for (let i = 0; i < confettiCount; i++) {
+                confetti.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height - canvas.height,
+                    size: Math.random() * 8 + 4,
+                    color: colors[Math.floor(Math.random() * colors.length)],
+                    speedY: Math.random() * 3 + 2,
+                    speedX: Math.random() * 2 - 1,
+                    rotation: Math.random() * 360,
+                    rotationSpeed: Math.random() * 10 - 5
+                });
+            }
+            
+            // 动画循环
+            function animate() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                let activeConfetti = 0;
+                confetti.forEach((piece, index) => {
+                    // 更新位置
+                    piece.y += piece.speedY;
+                    piece.x += piece.speedX;
+                    piece.rotation += piece.rotationSpeed;
+                    
+                    // 绘制彩带
+                    ctx.save();
+                    ctx.translate(piece.x, piece.y);
+                    ctx.rotate(piece.rotation * Math.PI / 180);
+                    ctx.fillStyle = piece.color;
+                    
+                    // 绘制不同形状
+                    if (index % 3 === 0) {
+                        // 矩形彩带
+                        ctx.fillRect(-piece.size / 2, -piece.size / 2, piece.size, piece.size * 2);
+                    } else if (index % 3 === 1) {
+                        // 圆形彩带
+                        ctx.beginPath();
+                        ctx.arc(0, 0, piece.size / 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    } else {
+                        // 三角形彩带
+                        ctx.beginPath();
+                        ctx.moveTo(0, -piece.size);
+                        ctx.lineTo(piece.size, piece.size);
+                        ctx.lineTo(-piece.size, piece.size);
+                        ctx.closePath();
+                        ctx.fill();
+                    }
+                    
+                    ctx.restore();
+                    
+                    // 检查是否还在屏幕内
+                    if (piece.y < canvas.height) {
+                        activeConfetti++;
+                    }
+                });
+                
+                // 如果还有活跃的彩带，继续动画
+                if (activeConfetti > 0) {
+                    requestAnimationFrame(animate);
+                } else {
+                    // 动画结束，清空画布
+                    canvas.width = 0;
+                    canvas.height = 0;
+                }
+            }
+            
+            // 开始动画
+            animate();
+        }
+
+        // 窗口大小改变时重新设置画布大小
+        window.addEventListener('resize', () => {
+            const canvas = document.getElementById('confettiCanvas');
+            if (canvas.width > 0) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+        });
+
+        // 播放庆祝音乐 - 清脆的叮当铃声
+        function playCelebrationMusic() {
+            // 检查浏览器是否支持Web Audio API
+            if (!window.AudioContext && !window.webkitAudioContext) {
+                return;
+            }
+            
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            // 定义清脆的音乐盒旋律 (使用简单的音阶)
+            // C5, E5, G5, C6 - 清脆的上升音阶
+            const melody = [
+                { note: 523.25, duration: 0.3 },  // C5
+                { note: 659.25, duration: 0.3 },  // E5
+                { note: 783.99, duration: 0.3 },  // G5
+                { note: 1046.50, duration: 0.5 }, // C6 (高音C)
+                { note: 783.99, duration: 0.3 },  // G5
+                { note: 1046.50, duration: 0.6 }  // C6 (结束音)
+            ];
+            
+            let startTime = audioContext.currentTime;
+            
+            melody.forEach((tone, index) => {
+                playNote(audioContext, tone.note, startTime, tone.duration);
+                startTime += tone.duration;
+            });
+        }
+        
+        // 播放单个音符
+        function playNote(audioContext, frequency, startTime, duration) {
+            // 创建振荡器 (音乐盒般的清脆声音)
+            const oscillator = audioContext.createOscillator();
+            oscillator.type = 'sine'; // 使用正弦波产生清脆的音色
+            oscillator.frequency.setValueAtTime(frequency, startTime);
+            
+            // 创建增益节点控制音量
+            const gainNode = audioContext.createGain();
+            
+            // 音量包络：快速上升，缓慢衰减（模拟钢片琴/音乐盒）
+            gainNode.gain.setValueAtTime(0, startTime);
+            gainNode.gain.linearRampToValueAtTime(0.3, startTime + 0.01); // 快速上升
+            gainNode.gain.exponentialRampToValueAtTime(0.01, startTime + duration); // 缓慢衰减
+            
+            // 添加一点混响效果，让声音更柔和
+            const filter = audioContext.createBiquadFilter();
+            filter.type = 'lowpass';
+            filter.frequency.setValueAtTime(2000, startTime);
+            
+            // 连接音频节点
+            oscillator.connect(filter);
+            filter.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            // 播放音符
+            oscillator.start(startTime);
+            oscillator.stop(startTime + duration);
+        }
+
+        function resetProgress() {
+            if (confirm('Are you sure you want to restart your journey? All progress will be lost.')) {
+                localStorage.removeItem('regressionProgress');
+                location.reload();
+            }
+        }
+    </script>
+</body>
+</html>
