@@ -5,9 +5,50 @@ document.addEventListener('DOMContentLoaded', () => {
 
     let currentPath = [];
     let pathCache = new Map(); // 新增：缓存策略
+    
+    // 语言管理
+    let currentLanguage = localStorage.getItem('language') || 'en';
+    
+    // 翻译函数：获取对应语言的文本
+    function t(textObject) {
+        if (!textObject) return '';
+        if (typeof textObject === 'string') return textObject;
+        return textObject[currentLanguage] || textObject.en || '';
+    }
+    
+    // 语言切换函数 - 切换语言而不是设置特定语言
+    window.toggleLanguage = function() {
+        // 切换语言
+        currentLanguage = currentLanguage === 'en' ? 'zh' : 'en';
+        localStorage.setItem('language', currentLanguage);
+        
+        // 更新UI文本
+        document.querySelector('h1 span').textContent = t(uiTranslations.title);
+        document.getElementById('restart-btn').textContent = t(uiTranslations.reset);
+        
+        // 更新语言切换按钮文本
+        const langBtn = document.getElementById('lang-toggle-btn');
+        langBtn.textContent = currentLanguage === 'en' ? 'EN' : '中文';
+        
+        // 重新初始化整个应用
+        initDecisionTree();
+        generateMethodsList();
+    };
+    
+    // 页面加载时初始化语言
+    function initLanguage() {
+        document.querySelector('h1 span').textContent = t(uiTranslations.title);
+        document.getElementById('restart-btn').textContent = t(uiTranslations.reset);
+        
+        // 设置语言切换按钮文本
+        const langBtn = document.getElementById('lang-toggle-btn');
+        if (langBtn) {
+            langBtn.textContent = currentLanguage === 'en' ? 'EN' : '中文';
+        }
+    }
 
     // 新增：深度优先搜索算法 - 查找方法对应的路径
-    function findPathToMethod(targetMethod, node = decisionTree.root, currentPath = []) {
+    function findPathToMethod(targetMethod, node = decisionTreeMultiLang.root, currentPath = []) {
         if (!node || !node.options) return null;
         
         for (let option of node.options) {
@@ -17,14 +58,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 nodeId: option.next || 'result'
             }];
             
-            // 如果找到目标方法
-            if (option.result === targetMethod) {
+            // 如果找到目标方法（需要比较英文版本）
+            const optionResult = t(option.result);
+            const optionResultEn = option.result?.en || option.result;
+            if (optionResultEn === targetMethod || optionResult === targetMethod) {
                 return newPath;
             }
             
             // 如果有下一个节点，继续搜索
             if (option.next) {
-                const result = findPathToMethod(targetMethod, decisionTree[option.next], newPath);
+                const result = findPathToMethod(targetMethod, decisionTreeMultiLang[option.next], newPath);
                 if (result) return result;
             }
         }
@@ -61,17 +104,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // 找到对应的决策树节点
             let node;
             if (index === 0) {
-                node = decisionTree.root;
+                node = decisionTreeMultiLang.root;
             } else {
                 // 根据前一个选择找到当前节点
                 const prevStep = path[index - 1];
                 // 需要从根节点开始重新计算路径到当前节点
-                let currentNode = decisionTree.root;
+                let currentNode = decisionTreeMultiLang.root;
                 for (let j = 0; j < index; j++) {
                     const currentStep = path[j];
-                    const option = currentNode.options.find(opt => opt.text === currentStep.answer);
+                    const option = currentNode.options.find(opt => t(opt.text) === t(currentStep.answer));
                     if (option && option.next) {
-                        currentNode = decisionTree[option.next];
+                        currentNode = decisionTreeMultiLang[option.next];
                     } else {
                         break;
                     }
@@ -86,23 +129,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const label = document.createElement('div');
                 label.className = 'select-label';
-                label.textContent = node.question;
+                label.textContent = t(node.question);
 
                 const select = document.createElement('select');
-                select.innerHTML = '<option value="" selected disabled>请选择...</option>';
+                select.innerHTML = `<option value="" selected disabled>${t(uiTranslations.selectPlaceholder)}</option>`;
 
                 const options = node.options;
                 
                 // 添加选项，并预设当前路径的选择
                 options.forEach(option => {
                     const optionEl = document.createElement('option');
-                    optionEl.value = option.next || option.result || '';
-                    optionEl.textContent = option.text;
+                    const resultValue = option.result ? (option.result.en || option.result) : '';
+                    optionEl.value = option.next || resultValue || '';
+                    optionEl.textContent = t(option.text);
                     optionEl.dataset.next = option.next || '';
-                    optionEl.dataset.result = option.result || '';
+                    optionEl.dataset.result = resultValue;
+                    // 存储英文文本作为语言无关的标识符
+                    optionEl.dataset.textEn = option.text.en || option.text;
                     
                     // 如果是当前路径中的选择，设为选中状态
-                    if (option.text === step.answer) {
+                    if (t(option.text) === t(step.answer)) {
                         optionEl.selected = true;
                     }
                     
@@ -145,7 +191,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetMethods();
         
         // 重新显示第一个问题
-        displayQuestion(decisionTree["root"]);
+        displayQuestion(decisionTreeMultiLang["root"]);
         
         // 更新状态
         currentPath = [];
@@ -160,21 +206,24 @@ document.addEventListener('DOMContentLoaded', () => {
         // 创建标签
         const label = document.createElement('div');
         label.className = 'select-label';
-        label.textContent = node.question;
+        label.textContent = t(node.question);
 
         // 创建下拉列表
         const select = document.createElement('select');
-        select.innerHTML = '<option value="" selected disabled>请选择...</option>';
+        select.innerHTML = `<option value="" selected disabled>${t(uiTranslations.selectPlaceholder)}</option>`;
 
         const options = node.options;
 
         // 添加选项
         options.forEach(option => {
             const optionEl = document.createElement('option');
-            optionEl.value = option.next || option.result || '';
-            optionEl.textContent = option.text;
-    optionEl.dataset.next = option.next || '';
-            optionEl.dataset.result = option.result || '';
+            const resultValue = option.result ? (option.result.en || option.result) : '';
+            optionEl.value = option.next || resultValue || '';
+            optionEl.textContent = t(option.text);
+            optionEl.dataset.next = option.next || '';
+            optionEl.dataset.result = resultValue;
+            // 存储英文文本作为语言无关的标识符
+            optionEl.dataset.textEn = option.text.en || option.text;
             select.appendChild(optionEl);
         });
 
@@ -208,22 +257,26 @@ document.addEventListener('DOMContentLoaded', () => {
             questionContainer.removeChild(questionContainer.lastChild);
         }
         
-        // 更新路径 - 截断到当前选择
+        // 更新路径 - 截断到当前选择，存储英文文本作为语言无关的标识符
         currentPath = currentPath.slice(0, currentIndex);
-        currentPath.push(selectedOption.textContent);
+        // 使用 data-text-en 属性存储英文文本，如果没有则使用 textContent
+        const textEn = selectedOption.dataset.textEn || selectedOption.textContent;
+        currentPath.push(textEn);
 
         if (selectedOption.dataset.result) {
             // 显示结果
     showResult(selectedOption.dataset.result);
         } else if (selectedOption.dataset.next) {
             // 进入下一个问题
-            const nextNode = decisionTree[selectedOption.dataset.next];
+            const nextNode = decisionTreeMultiLang[selectedOption.dataset.next];
             if (nextNode) {
                 // 检查下一个节点是否是最终节点（只有一个选项且该选项有结果）
                 if (nextNode.options.length === 1 && nextNode.options[0].result) {
-                    // 直接显示结果
-                    currentPath.push(nextNode.options[0].text);
-                    showResult(nextNode.options[0].result);
+                    // 直接显示结果，存储英文文本
+                    const textEn = nextNode.options[0].text.en || nextNode.options[0].text;
+                    currentPath.push(textEn);
+                    const resultValue = nextNode.options[0].result.en || nextNode.options[0].result;
+                    showResult(resultValue);
                 } else {
             // 显示下一个问题
                     displayQuestion(nextNode);
@@ -275,11 +328,14 @@ document.addEventListener('DOMContentLoaded', () => {
         // 如果当前选择有直接结果，返回该结果
         if (currentValue && !currentValue.includes('-') && !currentValue.includes(' ') && !currentValue.startsWith('Complex') && !currentValue.startsWith('Mechanism')) {
             // 检查是否是最终节点
-            const currentNode = decisionTree[currentValue];
+            const currentNode = decisionTreeMultiLang[currentValue];
             if (currentNode && currentNode.options) {
                 const results = currentNode.options
                     .filter(option => option.result)
-                    .map(option => option.result);
+                    .map(option => {
+                        // 返回英文版本作为方法名
+                        return option.result.en || option.result;
+                    });
                 if (results.length > 0) {
                     return results;
                 }
@@ -479,7 +535,7 @@ document.addEventListener('DOMContentLoaded', () => {
         resetMethods();
 
         // 显示第一个问题
-        displayQuestion(decisionTree["root"]);
+        displayQuestion(decisionTreeMultiLang["root"]);
     }
 
     // 从决策树中提取所有统计方法
@@ -497,36 +553,44 @@ document.addEventListener('DOMContentLoaded', () => {
             
             node.options.forEach(option => {
                 if (option.result) {
+                    // 使用英文版本作为键值
+                    const resultEn = option.result.en || option.result;
+                    
                     // 根据路径确定方法类别
                     let category;
-                    if (option.result.includes('Chi-square')) {
+                    if (resultEn.includes('Chi-square')) {
                         category = 'categorical';
-                    } else if (option.result.includes('Linear Regression') || 
-                             option.result === 'Correlation' || 
-                             option.result === 'Factor Analysis' || 
-                             option.result === 'Mixture Modeling (LPA)' ||
-                             option.result === 'Path Analysis' ||
-                             option.result === 'Structural Equation Modeling(SEM)' ||
-                             option.result === 'Mediation' ||
-                             option.result === 'Moderation') {
+                    } else if (resultEn.includes('Linear Regression') || 
+                             resultEn === 'Correlation' || 
+                             resultEn === 'Factor Analysis' || 
+                             resultEn === 'Mixture Modeling (LPA)' ||
+                             resultEn === 'Path Analysis' ||
+                             resultEn === 'Structural Equation Modeling(SEM)' ||
+                             resultEn === 'Mediation' ||
+                             resultEn === 'Moderation') {
                         category = 'continuous';
                     } else {
                         category = 'mixed';
                     }
                     
-                    // 添加到对应的集合中
-                    methods[category].add(option.result);
+                    // 添加到对应的集合中（存储完整的翻译对象）
+                    methods[category].add(JSON.stringify(option.result));
                 }
                 
                 // 如果有下一个节点，继续遍历
                 if (option.next) {
-                    traverseTree(decisionTree[option.next]);
+                    traverseTree(decisionTreeMultiLang[option.next]);
                 }
             });
         }
         
         // 从根节点开始遍历
-        traverseTree(decisionTree.root);
+        traverseTree(decisionTreeMultiLang.root);
+        
+        // 将 JSON 字符串转回对象
+        Object.keys(methods).forEach(key => {
+            methods[key] = Array.from(methods[key]).map(str => JSON.parse(str));
+        });
         
         return methods;
     }
@@ -542,7 +606,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 创建连续变量分析类别
         const continuousCategory = document.createElement('div');
         continuousCategory.className = 'method-category';
-        continuousCategory.innerHTML = '<h2>Continuous Variables Analysis</h2>';
+        continuousCategory.innerHTML = `<h2>${t(uiTranslations.continuousCategory)}</h2>`;
         
         const continuousGroup = document.createElement('div');
         continuousGroup.className = 'method-group';
@@ -551,16 +615,17 @@ document.addEventListener('DOMContentLoaded', () => {
             const methodItem = document.createElement('div');
             methodItem.className = 'method-item';
             methodItem.dataset.category = 'continuous';
-            methodItem.dataset.method = method;
-            methodItem.textContent = method;
+            const methodEn = method.en || method;
+            methodItem.dataset.method = methodEn;
+            methodItem.textContent = t(method);
             
             // 新增：添加点击事件
             methodItem.addEventListener('click', () => {
                 // 如果是Simple Linear Regression且为绿色高亮状态，跳转到教程页面
-                if (method === 'Simple Linear Regression' && methodItem.classList.contains('recommended')) {
+                if (methodEn === 'Simple Linear Regression' && methodItem.classList.contains('recommended')) {
                     window.location.href = 'simpleLinearRegression.html';
                 } else {
-                    showMethodPath(method);
+                showMethodPath(methodEn);
                 }
             });
             
@@ -573,7 +638,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 创建分类变量分析类别
         const categoricalCategory = document.createElement('div');
         categoricalCategory.className = 'method-category';
-        categoricalCategory.innerHTML = '<h2>Categorical Data Analysis</h2>';
+        categoricalCategory.innerHTML = `<h2>${t(uiTranslations.categoricalCategory)}</h2>`;
         
         const categoricalGroup = document.createElement('div');
         categoricalGroup.className = 'method-group';
@@ -582,12 +647,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const methodItem = document.createElement('div');
             methodItem.className = 'method-item';
             methodItem.dataset.category = 'categorical';
-            methodItem.dataset.method = method;
-            methodItem.textContent = method;
+            const methodEn = method.en || method;
+            methodItem.dataset.method = methodEn;
+            methodItem.textContent = t(method);
             
             // 新增：添加点击事件
             methodItem.addEventListener('click', () => {
-                showMethodPath(method);
+                showMethodPath(methodEn);
             });
             
             categoricalGroup.appendChild(methodItem);
@@ -599,7 +665,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // 创建混合变量分析类别
         const mixedCategory = document.createElement('div');
         mixedCategory.className = 'method-category';
-        mixedCategory.innerHTML = '<h2>Mixed Variables Analysis</h2>';
+        mixedCategory.innerHTML = `<h2>${t(uiTranslations.mixedCategory)}</h2>`;
         
         const mixedGroup = document.createElement('div');
         mixedGroup.className = 'method-group';
@@ -608,12 +674,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const methodItem = document.createElement('div');
             methodItem.className = 'method-item';
             methodItem.dataset.category = 'mixed';
-            methodItem.dataset.method = method;
-            methodItem.textContent = method;
+            const methodEn = method.en || method;
+            methodItem.dataset.method = methodEn;
+            methodItem.textContent = t(method);
             
             // 新增：添加点击事件
             methodItem.addEventListener('click', () => {
-                showMethodPath(method);
+                showMethodPath(methodEn);
             });
             
             mixedGroup.appendChild(methodItem);
@@ -623,6 +690,9 @@ document.addEventListener('DOMContentLoaded', () => {
         methodsContainer.appendChild(mixedCategory);
     }
 
+    // 初始化语言
+    initLanguage();
+    
     // 初始化方法列表
     generateMethodsList();
 

@@ -5,13 +5,144 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quantitative Method Recommender</title>
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* 语言切换按钮样式 - 单个按钮 */
+        .language-switcher {
+            display: flex;
+            align-items: center;
+        }
+        
+        .lang-btn {
+            background: transparent;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 400;
+            color: #999;
+            transition: all 0.2s ease;
+            min-width: 40px;
+            text-align: center;
+        }
+        
+        .lang-btn:hover {
+            color: #666;
+            background: rgba(0, 0, 0, 0.03);
+        }
+        
+        /* 头部布局：网站名、Reset按钮、语言切换在同一水平线 */
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            gap: 20px;
+        }
+        
+        .header-container h1 {
+            margin: 0;
+            flex: 1;
+        }
+        
+        .header-container h1 span {
+            flex: none;
+        }
+        
+        /* Reset按钮样式 - 与方法卡片相同 */
+        #restart-btn {
+            display: inline-block;
+            margin: 0;
+            padding: 8px 16px;
+            background: #ffffff;
+            color: #667eea;
+            border: 1px solid rgba(102, 126, 234, 0.2);
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            position: static;
+            transform: none;
+        }
+        
+        #restart-btn:hover {
+            background: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+            color: #ffffff;
+            border-color: #667eea;
+        }
+        
+        /* 页面一屏显示 - 禁止滚动 */
+        html, body {
+            height: 100vh;
+            overflow: hidden;
+            margin: 0;
+            padding: 0;
+        }
+        
+        .container {
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding: 15px 20px;
+            overflow: hidden;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header-container {
+            flex-shrink: 0;
+            margin-bottom: 0;
+        }
+        
+        #decision-tree {
+            flex-shrink: 0;
+        }
+        
+        #question-container {
+            margin-bottom: 10px !important;
+        }
+        
+        #methods-container {
+            flex: 1;
+            overflow: hidden;
+            min-height: 0;
+            margin-top: 10px !important;
+        }
+        
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+            
+            .header-container h1 {
+                width: 100%;
+            }
+            
+            .header-container #restart-btn {
+                align-self: flex-end;
+            }
+            
+            .lang-btn {
+                align-self: flex-end;
+            }
+        }
+    </style>
 </head>
 <body>
     <div class="container">
-        <h1>
-            <span>Quantitative Method Hub</span>
+        <div class="header-container">
+            <h1>
+                <span>Quantitative Method Hub</span>
+            </h1>
             <button id="restart-btn">Reset</button>
-        </h1>
+            <button class="lang-btn" id="lang-toggle-btn" onclick="toggleLanguage()">EN</button>
+        </div>
         
         <div id="decision-tree">
             <div id="question-container" class="question-container">
@@ -39,7 +170,7 @@
         </div>
     </div>
     
-    <script src="js/decisionTree.js"></script>
+    <script src="js/decisionTreeMultiLang.js"></script>
     <script src="js/main.js"></script>
 </body>
 </html>

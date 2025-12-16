@@ -9,22 +9,24 @@ body {
     background: #ffffff;
     color: #333;
     line-height: 1.6;
-    min-height: 100vh;
+    height: 100vh;
+    overflow: hidden;
 }
 
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 20px;
+    padding: 15px 20px;
     background-color: transparent;
-    min-height: 90vh;
-    margin-top: 0;
-    margin-bottom: 0;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
 }
 
 h1 {
     text-align: left;
-    margin-bottom: 20px;
+    margin-bottom: 16px;
     color: #2c3e50;
     font-size: 2.5rem;
     font-weight: 300;
@@ -43,11 +45,12 @@ h1 span {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 20px;
-    padding: 30px;
-    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-bottom: 10px;
+    padding: 22px 25px;
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.03);
     justify-content: center;
     align-items: flex-start;
 }
@@ -132,57 +135,82 @@ select option:hover {
 
 /* 方法展示区域样式 */
 .methods-container {
-    margin-top: 20px;
-    padding: 30px;
-    background: linear-gradient(145deg, #f8f9fa, #e9ecef);
-    border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    margin-top: 10px;
+    padding: 22px 25px;
+    background: #f9fafb;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+    border: 1px solid rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
 .method-category {
-    margin-bottom: 25px;
-    padding: 20px;
-    background: linear-gradient(145deg, #ffffff, #f8f9fa);
-    border-radius: 12px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.05);
+    margin-bottom: 16px;
+    padding: 16px 18px;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    border: none;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.method-category:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
 }
 
 .method-category h2 {
     color: #2c3e50;
-    margin-bottom: 20px;
-    font-size: 20px;
+    margin-bottom: 14px;
+    font-size: 19px;
     font-weight: 600;
     padding-bottom: 10px;
-    border-bottom: 2px solid #e9ecef;
+    border-bottom: none;
     text-transform: none;
+    position: relative;
+    padding-left: 14px;
+}
+
+.method-category h2::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 6px;
+    bottom: 6px;
+    width: 4px;
+    background: #667eea;
+    border-radius: 2px;
 }
 
 .method-group {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 10px;
 }
 
 .method-item {
-    padding: 12px 18px;
-    background: linear-gradient(145deg, #e3f2fd, #bbdefb);
+    padding: 10px 16px;
+    background: #e0f2fe;
     border-radius: 10px;
-    color: #0d47a1;
-    font-size: 14px;
+    color: #0369a1;
+    font-size: 13px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.2s ease;
     opacity: 1;
     transform: scale(1);
     cursor: pointer;
-    border: 1px solid rgba(13, 71, 161, 0.1);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    border: 1px solid #bae6fd;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.02);
 }
 
 .method-item:hover {
-    background: linear-gradient(145deg, #bbdefb, #90caf9);
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    color: #0d47a1;
+    background: #dbeafe;
+    border-color: #0284c7;
+    color: #0c4a6e;
+    box-shadow: 0 4px 12px rgba(14, 165, 233, 0.15);
+    transform: translateY(-1px);
 }
 
 .method-item.hidden {
@@ -193,12 +221,12 @@ select option:hover {
 }
 
 .method-item.recommended {
-    background: linear-gradient(145deg, #e8f5e9, #c8e6c9);
-    color: #2e7d32;
+    background: #f0fdf4;
+    color: #16a34a;
     font-weight: 600;
-    transform: scale(1.05);
-    box-shadow: 0 4px 15px rgba(46, 125, 50, 0.2);
-    border: 2px solid #4caf50;
+    transform: scale(1.02);
+    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.1);
+    border: 1px solid #86efac;
 }
 
 #restart-btn {
