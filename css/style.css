@@ -11,6 +11,8 @@ body {
     line-height: 1.6;
     height: 100vh;
     overflow: hidden;
+    margin: 0;
+    padding: 0;
 }
 
 .container {
@@ -22,6 +24,25 @@ body {
     display: flex;
     flex-direction: column;
     overflow: hidden;
+}
+
+/* 头部布局：网站名、Reset按钮、语言切换在同一水平线 */
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0;
+    gap: 20px;
+    flex-shrink: 0;
+}
+
+.header-container h1 {
+    margin: 0;
+    flex: 1;
+}
+
+.header-container h1 span {
+    flex: none;
 }
 
 h1 {
@@ -41,11 +62,40 @@ h1 span {
     flex: 1;
 }
 
+/* 语言切换按钮样式 - 单个按钮 */
+.language-switcher {
+    display: flex;
+    align-items: center;
+}
+
+.lang-btn {
+    background: transparent;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 400;
+    color: #999;
+    transition: all 0.2s ease;
+    min-width: 40px;
+    text-align: center;
+}
+
+.lang-btn:hover {
+    color: #666;
+    background: rgba(0, 0, 0, 0.03);
+}
+
+#decision-tree {
+    flex-shrink: 0;
+}
+
 .question-container {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 10px;
+    margin-bottom: 10px !important;
     padding: 22px 25px;
     background: #f9fafb;
     border-radius: 12px;
@@ -135,7 +185,7 @@ select option:hover {
 
 /* 方法展示区域样式 */
 .methods-container {
-    margin-top: 10px;
+    margin-top: 10px !important;
     padding: 22px 25px;
     background: #f9fafb;
     border-radius: 12px;
@@ -144,6 +194,8 @@ select option:hover {
     overflow: hidden;
     display: flex;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 .method-category {
@@ -229,28 +281,29 @@ select option:hover {
     border: 1px solid #86efac;
 }
 
+/* Reset按钮样式 - 与方法卡片相同 */
 #restart-btn {
     display: inline-block;
     margin: 0;
-    padding: 14px 28px;
-    background: linear-gradient(145deg, #667eea, #764ba2);
-    color: white;
-    border: none;
-    border-radius: 12px;
+    padding: 8px 16px;
+    background: #ffffff;
+    color: #667eea;
+    border: 1px solid rgba(102, 126, 234, 0.2);
+    border-radius: 8px;
     cursor: pointer;
-    font-size: 16px;
+    font-size: 13px;
     font-weight: 500;
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    position: absolute;
-    right: 0;
-    top: 50%;
-    transform: translateY(-50%);
+    transition: all 0.2s ease;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    position: static;
+    transform: none;
 }
 
 #restart-btn:hover {
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(145deg, #5a6fd8, #6a4190);
+    background: #667eea;
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+    color: #ffffff;
+    border-color: #667eea;
 }
 
 /* 响应式设计 */
@@ -322,6 +375,25 @@ select option:hover {
     
     .method-item {
         width: 100%;
+    }
+    
+    /* 新增的响应式样式 */
+    .header-container {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    
+    .header-container h1 {
+        width: 100%;
+    }
+    
+    .header-container #restart-btn {
+        align-self: flex-end;
+    }
+    
+    .lang-btn {
+        align-self: flex-end;
     }
 }
 
@@ -420,7 +492,7 @@ select option:hover {
     visibility: visible;
 }
 
-/* 响应式设计 - 底部链接 */
+/* 响应式设计 - 底部链接 - 补充 */
 @media (max-width: 768px) {
     .footer-links {
         bottom: 15px;
@@ -433,4 +505,4 @@ select option:hover {
         right: 15px;
         padding: 10px 14px;
     }
-} 
+}
