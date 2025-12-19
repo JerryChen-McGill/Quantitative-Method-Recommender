@@ -330,10 +330,20 @@ select option:hover {
 }
 
 @media (max-width: 768px) {
+    /* 手机端允许滚动 */
+    body {
+        overflow: auto;
+        height: auto;
+        min-height: 100vh;
+    }
+    
     .container {
         padding: 20px 15px;
         margin-top: 2vh;
         margin-bottom: 2vh;
+        height: auto;
+        min-height: 100vh;
+        overflow: visible;
     }
     
     h1 {
@@ -367,6 +377,8 @@ select option:hover {
     
     .methods-container {
         padding: 20px;
+        overflow: visible;
+        flex: none;
     }
     
     .method-group {
