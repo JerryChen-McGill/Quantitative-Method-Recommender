@@ -392,6 +392,10 @@ const uiTranslations = {
     mixedCategory: {
         en: "Mixed Variables Analysis",
         zh: "混合变量分析"
+    },
+    copySuccess: {
+        en: "Copied successfully",
+        zh: "复制成功"
     }
 };
 

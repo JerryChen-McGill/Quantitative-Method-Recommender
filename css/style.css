@@ -18,7 +18,7 @@ body {
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 15px 20px;
+    padding: 12px 20px 15px 20px;
     background-color: transparent;
     height: 100vh;
     display: flex;
@@ -31,7 +31,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 0;
+    margin-bottom: 5px;
     gap: 20px;
     flex-shrink: 0;
 }
@@ -95,8 +95,8 @@ h1 span {
     display: flex;
     flex-wrap: wrap;
     gap: 12px;
-    margin-bottom: 10px !important;
-    padding: 22px 25px;
+    margin-bottom: 8px !important;
+    padding: 20px 25px;
     background: #f9fafb;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -185,8 +185,8 @@ select option:hover {
 
 /* 方法展示区域样式 */
 .methods-container {
-    margin-top: 10px !important;
-    padding: 22px 25px;
+    margin-top: 8px !important;
+    padding: 20px 25px;
     background: #f9fafb;
     border-radius: 12px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
@@ -411,12 +411,14 @@ select option:hover {
 
 /* 底部链接样式 */
 .footer-links {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
     display: flex;
+    justify-content: center;
+    align-items: center;
     gap: 15px;
-    z-index: 1000;
+    padding: 15px 0;
+    margin-top: auto;
+    flex-shrink: 0;
+    position: relative;
 }
 
 .footer-link {
@@ -434,9 +436,10 @@ select option:hover {
 
 /* Contact邮箱弹窗样式 */
 .contact-modal {
-    position: fixed;
-    bottom: 60px;
-    right: 20px;
+    position: absolute;
+    bottom: 100%;
+    left: 50%;
+    transform: translateX(-50%) translateY(-10px);
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
     border-radius: 8px;
@@ -444,16 +447,16 @@ select option:hover {
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     opacity: 0;
     visibility: hidden;
-    transform: translateY(10px);
     transition: all 0.3s ease;
     z-index: 1001;
     border: 1px solid rgba(0, 0, 0, 0.1);
+    margin-bottom: 10px;
 }
 
 .contact-modal.show {
     opacity: 1;
     visibility: visible;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
 }
 
 .contact-content {
@@ -507,14 +510,19 @@ select option:hover {
 /* 响应式设计 - 底部链接 - 补充 */
 @media (max-width: 768px) {
     .footer-links {
-        bottom: 15px;
-        right: 15px;
+        padding: 12px 0;
         gap: 12px;
     }
     
     .contact-modal {
-        bottom: 50px;
-        right: 15px;
+        bottom: 100%;
+        left: 50%;
+        transform: translateX(-50%) translateY(-10px);
         padding: 10px 14px;
+        margin-bottom: 10px;
+    }
+    
+    .contact-modal.show {
+        transform: translateX(-50%) translateY(0);
     }
 }

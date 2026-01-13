@@ -708,7 +708,7 @@ function initFooterLinks() {
     const contactLink = document.getElementById('contact-link');
     const contactModal = document.getElementById('contact-modal');
     const copyBtn = document.getElementById('copy-btn');
-    const email = '1694377957@qq.com';
+    const email = 'shuai.chen@mail.mcgill.ca';
 
     // Contact链接点击事件
     contactLink.addEventListener('click', (e) => {
@@ -743,10 +743,14 @@ function initFooterLinks() {
 
 // 显示复制成功提示
 function showCopySuccess() {
+    // 获取当前语言设置
+    const currentLanguage = localStorage.getItem('language') || 'en';
+    const successText = currentLanguage === 'zh' ? uiTranslations.copySuccess.zh : uiTranslations.copySuccess.en;
+    
     // 创建提示元素
     const successMsg = document.createElement('div');
     successMsg.className = 'copy-success';
-    successMsg.textContent = '复制成功';
+    successMsg.textContent = successText;
     document.body.appendChild(successMsg);
 
     // 显示提示
